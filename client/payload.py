@@ -219,15 +219,6 @@ def generate_story_with_file(prompt, file, p_name_mapping = {"p1a": "Ash", "p2a"
     with open("rewind_test.json", "w") as f:
         f.write(json.dumps(battle.ai_chat_history, indent=4))
 
-def wooper_hallucination_test(prompt):
-    battle = BattleHistory("", prompt, URL_BATTLE_CHAT_GENERATOR_TEST, URL_CHECK_HALLUCINATION)
-    turn_text = ''' Gary: Wooper used Ice punch on Dragonite for 100 damage it was super effective
-Ash: Dragonite Roost and healed for 50
-'''
-    turn_info = {"pokemon": ["Dragonite", "Tauros", "Wooper"], "moves": ["Ice Punch"], "items": [], "abilities": []}
-    expl = battle.generate_next_move_with_checks(turn_text, turn_info)
-    print(expl)
-
 def hallucination_check_test(prompt): 
     battle = BattleHistory("", prompt, URL_BATTLE_CHAT_GENERATOR_TEST, URL_CHECK_HALLUCINATION)
     story = '''Ash: Alakazam can't move
@@ -241,55 +232,12 @@ Ash: Alakazam switched out for Exeggutor
     print(expl)
 
 if __name__ == "__main__":
-#     prompt = '''Pretend you are player 2 in a pokemon battle between two trainers. 
-# Trash talk player 1 in an engaging and entertaining way.
-# Make sure to align it with the battle state. sat 30 words or less.'''
     prompt = '''You are Gary in a pokemon battle between you and Ash. Trash-talk Ash based on the actions in the battle. Your actions will be described in the following format 
 "Gary: [your action here]". Ash actions will be described in the following format "Ash: [Ash's action here]". Do not say anything about the future. Do not say anything about the future.
 Only trash-talk about the current game state. Say 30 words or less.'''
 
     file = "replays/logs/gen1ou/gen1ou-2093371513.log"
-    # wooper_hallucination_test(prompt)
-    # print("\n\n")
-    # for i in range(3):
-    #     hallucination_check_test(prompt)
-    #     print("\n\n")
     
-
-
 
     generate_story_with_file(prompt, file, p_name_mapping = {"p1a": "Ash", "p2a": "Gary"})
 
-
-
-def commentator_generator_test_old(prompt): 
-    battle_logs = []
-
-    with open('replays/cleaned_logs/1/gen1ou/gen1ou-2093289585.txt') as f:
-        current_round = "The start of the battle is:\n"
-        battle_start = True
-        for i,line in enumerate(f): 
-            if "Turn" in line:
-                battle_logs.append(current_round)
-                current_round = ""
-                battle_start = False
-            else:
-                if battle_start and "Switched to" in line:
-                    line = line.replace("Switched to", "Started with")
-            if "p1" in line: 
-                line = line.replace("p1", "Ash")
-            if "p2" in line:
-                line = line.replace("p2", "Gary")
-            current_round += line
-
-        battle_logs.append(current_round)
-    with open('hal.txt', 'w') as f:
-        battle = BattleHistory("", prompt, URL_BATTLE_CHAT_GENERATOR_TEST, URL_CHECK_HALLUCINATION)
-        for i, battle_line in enumerate(battle_logs):
-            print("Round:",i)
-            print(battle_line)
-            expl = battle.generate_next_move_with_checks(battle_line)
-            print(expl)
-            print("\n\n")
-        # print(battle.generated_story_history)
-        f.write("\n\n".join(battle.generated_story_history))
